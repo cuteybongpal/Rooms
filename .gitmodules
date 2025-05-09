@@ -1,0 +1,3 @@
+[submodule "Assets/@Resources/Script/FrameWork"]
+	path = Assets/@Resources/Script/FrameWork
+	url = https://github.com/cuteybongpal/FrameWork.git
