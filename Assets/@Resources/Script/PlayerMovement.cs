@@ -1,39 +1,106 @@
-using UnityEngine; // Unity 엔진의 기능을 사용하기 위해 필요합니다.
+using UnityEngine;
 
-// 플레이어의 이동을 담당하는 스크립트입니다.
 public class PlayerMovement : MonoBehaviour
 {
-    public float moveSpeed = 5f; // 플레이어의 이동 속도입니다. Inspector 창에서 조절할 수 있습니다.
+    // 이동 및 애니메이션 관련 변수
+    public float moveSpeed = 5f;        // 플레이어 이동 속도
+    private Animator animator;
+    private float moveX;
+    private float moveY;
+    private bool currentIsMovingState;
+    private string animatorParameterName = "isMoving"; // 애니메이터의 '움직임' 파라미터 이름
 
-    private Rigidbody2D rb;       // 플레이어의 Rigidbody2D 컴포넌트를 저장할 변수입니다. 물리 기반 이동에 사용됩니다.
-    private Vector2 movement;     // 플레이어의 현재 이동 방향을 저장할 Vector2 변수입니다.
+    // 캐릭터 방향 관련 변수
+    private SpriteRenderer spriteRenderer;
+    private bool _isFacingRight = true;   // 플레이어가 처음에 오른쪽을 보고 있다고 가정
 
-    // 게임이 시작될 때 한번 호출되는 함수입니다. 초기화에 주로 사용됩니다.
+    // 제어 가능 상태 변수
+    private bool _canControlPlayer = true; // 이 값이 false면 플레이어는 움직이지 않아야 합니다.
+
     void Start()
     {
-        // 현재 게임 오브젝트에 붙어있는 Rigidbody2D 컴포넌트를 찾아서 rb 변수에 할당합니다.
-        rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
+        if (animator == null)
+        {
+            Debug.LogError("PlayerMovement: Animator 컴포넌트를 찾을 수 없습니다!");
+        }
+
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+        {
+            Debug.LogError("PlayerMovement: SpriteRenderer 컴포넌트를 찾을 수 없습니다!");
+        }
     }
 
-    // 매 프레임마다 호출되는 함수입니다. 주로 입력을 받거나 비물리적인 로직 처리에 사용됩니다.
+    // SpiritSystemManager가 이 함수를 호출하여 플레이어 조종 상태를 변경합니다.
+    public void SetControllable(bool controllable)
+    {
+        _canControlPlayer = controllable;
+        if (!_canControlPlayer) // 조종 불가능 상태가 되면
+        {
+            // 움직임과 관련된 모든 상태를 즉시 '멈춤'으로 설정
+            currentIsMovingState = false;
+            if (animator != null)
+            {
+                animator.SetBool(animatorParameterName, false); // 애니메이션도 멈춤
+            }
+            //Rigidbody2D가 있다면 속도를 0으로 만들 수도 있습니다.
+            // 예: if (GetComponent<Rigidbody2D>() != null) GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+        }
+    }
+
     void Update()
     {
-        // 수평축(Horizontal: A, D, 좌우 화살표) 입력을 받습니다. GetAxisRaw는 -1, 0, 1 값만 반환합니다.
-        movement.x = Input.GetAxisRaw("Horizontal");
-        // 수직축(Vertical: W, S, 위아래 화살표) 입력을 받습니다.
-        movement.y = Input.GetAxisRaw("Vertical");
+        // ★★★ 가장 중요한 부분 ★★★
+        // _canControlPlayer가 false (조종 불가능)이면, 아래 로직을 실행하지 않고 함수를 종료합니다.
+        if (!_canControlPlayer)
+        {
+            return;
+        }
+        // ★★★★★★★★★★★★★★★
 
-        // movement 벡터를 정규화합니다. 대각선 이동 시 속도가 빨라지는 것을 방지하기 위함입니다.
-        // (예: x=1, y=1 일 때 벡터 길이는 약 1.414, 정규화하면 길이가 1이 됨)
-        movement.Normalize();
+        // --- 아래는 _canControlPlayer가 true일 때만 실행됩니다 ---
+
+        // 입력 감지
+        moveX = Input.GetAxisRaw("Horizontal");
+        moveY = Input.GetAxisRaw("Vertical");
+        Vector2 moveInput = new Vector2(moveX, moveY);
+
+        // 캐릭터 방향 전환 로직
+        if (moveX > 0 && !_isFacingRight) // 오른쪽으로 움직이는데 왼쪽을 보고 있다면
+        {
+            Flip();
+        }
+        else if (moveX < 0 && _isFacingRight) // 왼쪽으로 움직이는데 오른쪽을 보고 있다면
+        {
+            Flip();
+        }
+
+        // 애니메이션 상태 업데이트
+        if (moveInput.sqrMagnitude > 0.01f)
+        {
+            currentIsMovingState = true;
+        }
+        else
+        {
+            currentIsMovingState = false;
+        }
+
+        if (animator != null)
+        {
+            animator.SetBool(animatorParameterName, currentIsMovingState);
+        }
+
+        // 실제 이동 로직
+        transform.Translate(moveInput.normalized * moveSpeed * Time.deltaTime, Space.World);
     }
 
-    // 고정된 시간 간격으로 호출되는 함수입니다. 물리 계산 및 Rigidbody를 사용하는 이동은 여기서 처리하는 것이 좋습니다.
-    void FixedUpdate()
+    private void Flip()
     {
-        // Rigidbody2D의 위치를 현재 위치(rb.position)에서 계산된 이동량만큼 옮깁니다.
-        // movement 벡터에 moveSpeed와 Time.fixedDeltaTime을 곱하여 프레임 속도와 관계없이 일정한 속도로 이동하게 합니다.
-        // Time.fixedDeltaTime은 FixedUpdate 호출 간의 시간 간격입니다.
-        rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime);
+        _isFacingRight = !_isFacingRight;
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.flipX = !_isFacingRight; // 기본 스프라이트가 오른쪽을 향한다고 가정
+        }
     }
 }
