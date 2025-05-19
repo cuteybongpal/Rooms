@@ -1,67 +1,128 @@
-using UnityEngine; // Unity ¿£ÁøÀÇ ±â´ÉÀ» »ç¿ëÇÏ±â À§ÇØ ÇÊ¿äÇÕ´Ï´Ù.
+using UnityEngine; // Unity ì—”ì§„ì˜ ê¸°ëŠ¥ì„ ì‚¬ìš©í•˜ê¸° ìœ„í•´ í•„ìš”í•©ë‹ˆë‹¤.
 
-// ÇÃ·¹ÀÌ¾îÀÇ Ã¼·ÂÀ» °ü¸®ÇÏ´Â ½ºÅ©¸³Æ®ÀÔ´Ï´Ù.
+// í”Œë ˆì´ì–´ì˜ ì²´ë ¥ì„ ê´€ë¦¬í•˜ëŠ” ìŠ¤í¬ë¦½íŠ¸ì…ë‹ˆë‹¤.
 public class PlayerHealth : MonoBehaviour
 {
-    public int maxHealth = 100;  // ÇÃ·¹ÀÌ¾îÀÇ ÃÖ´ë Ã¼·ÂÀÔ´Ï´Ù. Inspector Ã¢¿¡¼­ ÃÊ±â°ªÀ» ¼³Á¤ÇÒ ¼ö ÀÖ½À´Ï´Ù.
-    public int currentHealth;    // ÇÃ·¹ÀÌ¾îÀÇ ÇöÀç Ã¼·ÂÀ» ÀúÀåÇÏ´Â º¯¼öÀÔ´Ï´Ù.
+    public int maxHealth = 100;  // í”Œë ˆì´ì–´ì˜ ìµœëŒ€ ì²´ë ¥ì…ë‹ˆë‹¤.
+    public int currentHealth;    // í”Œë ˆì´ì–´ì˜ í˜„ì¬ ì²´ë ¥ì„ ì €ì¥í•˜ëŠ” ë³€ìˆ˜ì…ë‹ˆë‹¤.
+    private Animator animator;     // í”Œë ˆì´ì–´ì˜ Animator ì»´í¬ë„ŒíŠ¸ë¥¼ ì €ì¥í•  ë³€ìˆ˜ì…ë‹ˆë‹¤.
+    private bool isDead = false;   // í”Œë ˆì´ì–´ê°€ ì´ë¯¸ ì£½ì—ˆëŠ”ì§€ í™•ì¸í•˜ëŠ” í”Œë˜ê·¸
 
-    // °ÔÀÓÀÌ ½ÃÀÛµÉ ¶§ ÇÑ¹ø È£ÃâµÇ´Â ÇÔ¼öÀÔ´Ï´Ù.
+    // ê²Œì„ì´ ì‹œì‘ë  ë•Œ í•œë²ˆ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜ì…ë‹ˆë‹¤.
     void Start()
     {
-        // ÇöÀç Ã¼·ÂÀ» ÃÖ´ë Ã¼·ÂÀ¸·Î ÃÊ±âÈ­ÇÕ´Ï´Ù.
+        // í˜„ì¬ ì²´ë ¥ì„ ìµœëŒ€ ì²´ë ¥ìœ¼ë¡œ ì´ˆê¸°í™”í•©ë‹ˆë‹¤.
         currentHealth = maxHealth;
-        // ÄÜ¼Ö¿¡ ÃÊ±â Ã¼·Â °ªÀ» ·Î±×·Î Ãâ·ÂÇÕ´Ï´Ù. (µğ¹ö±ë¿ë)
+        // í˜„ì¬ ê²Œì„ ì˜¤ë¸Œì íŠ¸ì— ë¶™ì–´ìˆëŠ” Animator ì»´í¬ë„ŒíŠ¸ë¥¼ ì°¾ì•„ì„œ animator ë³€ìˆ˜ì— í• ë‹¹í•©ë‹ˆë‹¤.
+        animator = GetComponent<Animator>();
+        // Animatorê°€ ì—†ëŠ” ê²½ìš°ë¥¼ ëŒ€ë¹„í•œ null ì²´í¬ (ì˜¤ë¥˜ ë°©ì§€)
+        if (animator == null)
+        {
+            Debug.LogError("Player GameObjectì— Animator ì»´í¬ë„ŒíŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤!");
+        }
         Debug.Log("Player health initialized to: " + currentHealth);
     }
 
-    // ÇÃ·¹ÀÌ¾î°¡ µ¥¹ÌÁö¸¦ ÀÔ¾úÀ» ¶§ È£ÃâµÇ´Â ÇÔ¼öÀÔ´Ï´Ù.
-    // damageAmount ¸¸Å­ Ã¼·ÂÀÌ °¨¼ÒÇÕ´Ï´Ù.
+    // í”Œë ˆì´ì–´ê°€ ë°ë¯¸ì§€ë¥¼ ì…ì—ˆì„ ë•Œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜ì…ë‹ˆë‹¤.
     public void TakeDamage(int damageAmount)
     {
-        // ÇöÀç Ã¼·Â¿¡¼­ ¹ŞÀº µ¥¹ÌÁö ¾ç¸¸Å­ »®´Ï´Ù.
+        // ì´ë¯¸ ì£½ì—ˆë‹¤ë©´ ë°ë¯¸ì§€ë¥¼ ë°›ì§€ ì•ŠìŒ
+        if (isDead) return;
+
+        // í˜„ì¬ ì²´ë ¥ì—ì„œ ë°›ì€ ë°ë¯¸ì§€ ì–‘ë§Œí¼ ëºë‹ˆë‹¤.
         currentHealth -= damageAmount;
 
-        // Ã¼·ÂÀÌ 0 ¹Ì¸¸À¸·Î ³»·Á°¡Áö ¾Êµµ·Ï ÇÕ´Ï´Ù.
+        // ì²´ë ¥ì´ 0 ë¯¸ë§Œìœ¼ë¡œ ë‚´ë ¤ê°€ì§€ ì•Šë„ë¡ í•©ë‹ˆë‹¤.
         if (currentHealth < 0)
         {
             currentHealth = 0;
         }
 
-        // ÄÜ¼Ö¿¡ µ¥¹ÌÁö¿Í ÇöÀç Ã¼·ÂÀ» ·Î±×·Î Ãâ·ÂÇÕ´Ï´Ù. (µğ¹ö±ë¿ë)
+        // ì½˜ì†”ì— ë°ë¯¸ì§€ì™€ í˜„ì¬ ì²´ë ¥ì„ ë¡œê·¸ë¡œ ì¶œë ¥í•©ë‹ˆë‹¤.
         Debug.Log("Player took " + damageAmount + " damage. Current health: " + currentHealth);
 
-        // Ã¼·ÂÀÌ 0 ÀÌÇÏ°¡ µÇ¸é Die ÇÔ¼ö¸¦ È£ÃâÇÏ¿© »ç¸Á Ã³¸®¸¦ ÇÕ´Ï´Ù.
+        // ì²´ë ¥ì´ 0 ì´í•˜ê°€ ë˜ë©´ Die í•¨ìˆ˜ë¥¼ í˜¸ì¶œí•˜ì—¬ ì‚¬ë§ ì²˜ë¦¬ë¥¼ í•©ë‹ˆë‹¤.
         if (currentHealth <= 0)
         {
             Die();
         }
     }
 
-    // ÇÃ·¹ÀÌ¾î°¡ Ã¼·ÂÀ» È¸º¹ÇÒ ¶§ È£ÃâµÇ´Â ÇÔ¼öÀÔ´Ï´Ù.
-    // healAmount ¸¸Å­ Ã¼·ÂÀÌ Áõ°¡ÇÕ´Ï´Ù.
+    // í”Œë ˆì´ì–´ê°€ ì²´ë ¥ì„ íšŒë³µí•  ë•Œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜ì…ë‹ˆë‹¤.
     public void Heal(int healAmount)
     {
-        // ÇöÀç Ã¼·Â¿¡ È¸º¹·®¸¸Å­ ´õÇÕ´Ï´Ù.
+        // ì´ë¯¸ ì£½ì—ˆë‹¤ë©´ íšŒë³µí•˜ì§€ ì•ŠìŒ
+        if (isDead) return;
+
+        // í˜„ì¬ ì²´ë ¥ì— íšŒë³µëŸ‰ë§Œí¼ ë”í•©ë‹ˆë‹¤.
         currentHealth += healAmount;
 
-        // Ã¼·ÂÀÌ ÃÖ´ë Ã¼·ÂÀ» ÃÊ°úÇÏÁö ¾Êµµ·Ï ÇÕ´Ï´Ù.
+        // ì²´ë ¥ì´ ìµœëŒ€ ì²´ë ¥ì„ ì´ˆê³¼í•˜ì§€ ì•Šë„ë¡ í•©ë‹ˆë‹¤.
         if (currentHealth > maxHealth)
         {
             currentHealth = maxHealth;
         }
 
-        // ÄÜ¼Ö¿¡ È¸º¹·®°ú ÇöÀç Ã¼·ÂÀ» ·Î±×·Î Ãâ·ÂÇÕ´Ï´Ù. (µğ¹ö±ë¿ë)
+        // ì½˜ì†”ì— íšŒë³µëŸ‰ê³¼ í˜„ì¬ ì²´ë ¥ì„ ë¡œê·¸ë¡œ ì¶œë ¥í•©ë‹ˆë‹¤.
         Debug.Log("Player healed " + healAmount + " health. Current health: " + currentHealth);
     }
 
-    // ÇÃ·¹ÀÌ¾î°¡ »ç¸ÁÇßÀ» ¶§ È£ÃâµÇ´Â ÇÔ¼öÀÔ´Ï´Ù.
+    // í”Œë ˆì´ì–´ê°€ ì‚¬ë§í–ˆì„ ë•Œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜ì…ë‹ˆë‹¤.
     private void Die()
     {
-        // ÄÜ¼Ö¿¡ »ç¸Á ¸Ş½ÃÁö¸¦ ·Î±×·Î Ãâ·ÂÇÕ´Ï´Ù. (µğ¹ö±ë¿ë)
+        // ì´ë¯¸ ì£½ìŒ ì²˜ë¦¬ê°€ ë˜ì—ˆë‹¤ë©´ ì¤‘ë³µ ì‹¤í–‰ ë°©ì§€
+        if (isDead) return;
+        isDead = true; // ì£½ìŒ ìƒíƒœë¡œ ë³€ê²½
+
+        // ì½˜ì†”ì— ì‚¬ë§ ë©”ì‹œì§€ë¥¼ ë¡œê·¸ë¡œ ì¶œë ¥í•©ë‹ˆë‹¤.
         Debug.Log("Player Died!");
-        // ¿©±â¿¡ ½ÇÁ¦ »ç¸Á Ã³¸® ·ÎÁ÷À» Ãß°¡ÇÕ´Ï´Ù.
-        // ¿¹: °ÔÀÓ ¿À¹ö È­¸é Ç¥½Ã, ÇÃ·¹ÀÌ¾î ¿ÀºêÁ§Æ® ºñÈ°¼ºÈ­ ¶Ç´Â ÆÄ±« µî
-        // gameObject.SetActive(false); // ÇÃ·¹ÀÌ¾î ¿ÀºêÁ§Æ®¸¦ ºñÈ°¼ºÈ­ÇÕ´Ï´Ù.
+
+        // Animator ì»´í¬ë„ŒíŠ¸ê°€ ìˆê³ , "Die" ë¼ëŠ” ì´ë¦„ì˜ Trigger íŒŒë¼ë¯¸í„°ë¥¼ ë°œë™ì‹œí‚µë‹ˆë‹¤.
+        if (animator != null)
+        {
+            animator.SetTrigger("Die");
+        }
+
+        // í”Œë ˆì´ì–´ ì‚¬ë§ ì‹œ ì¶”ê°€ ë¡œì§ (ì„ íƒ ì‚¬í•­ ì ìš©)
+
+        // 1. í”Œë ˆì´ì–´ ì´ë™ ë° ìƒí˜¸ì‘ìš© ìŠ¤í¬ë¦½íŠ¸ ë¹„í™œì„±í™”
+        PlayerMovement movementScript = GetComponent<PlayerMovement>();
+        if (movementScript != null)
+        {
+            movementScript.enabled = false; // PlayerMovement ìŠ¤í¬ë¦½íŠ¸ë¥¼ ë¹„í™œì„±í™”í•˜ì—¬ ì´ë™ì„ ë§‰ìŠµë‹ˆë‹¤.
+        }
+
+        PlayerInteraction interactionScript = GetComponent<PlayerInteraction>();
+        if (interactionScript != null)
+        {
+            interactionScript.enabled = false; // PlayerInteraction ìŠ¤í¬ë¦½íŠ¸ ë¹„í™œì„±í™”
+        }
+
+        // 2. í”Œë ˆì´ì–´ì˜ ì½œë¼ì´ë” ë¹„í™œì„±í™” (ë‹¤ë¥¸ ì˜¤ë¸Œì íŠ¸ì™€ ë” ì´ìƒ ì¶©ëŒí•˜ì§€ ì•Šë„ë¡)
+        Collider2D playerCollider = GetComponent<Collider2D>();
+        if (playerCollider != null)
+        {
+            playerCollider.enabled = false;
+        }
+
+        // 3. Rigidbodyì˜ ë¬¼ë¦¬ íš¨ê³¼ ì¤‘ì§€ (ì„ íƒì , í•„ìš”ì— ë”°ë¼)
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero; // í˜„ì¬ ì†ë„ ì œê±°
+            rb.isKinematic = true; // ë¬¼ë¦¬ ì—”ì§„ì˜ ì˜í–¥ì„ ë°›ì§€ ì•Šë„ë¡ ì„¤ì • (ë˜ëŠ” Gravity Scale = 0 ë“±)
+        }
+
+        // 4. (ì„ íƒ) ëª‡ ì´ˆ í›„ ê²Œì„ì˜¤ë²„ í™”ë©´ì„ ë„ìš°ê±°ë‚˜ ì”¬ì„ ë‹¤ì‹œ ë¡œë“œí•˜ëŠ” ë¡œì§ì„ ì—¬ê¸°ì— ì¶”ê°€í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤.
+        // ì˜ˆ: Invoke("ShowGameOverScreen", 2f); // 2ì´ˆ í›„ì— ShowGameOverScreen í•¨ìˆ˜ í˜¸ì¶œ
     }
+
+    // ì˜ˆì‹œ: ê²Œì„ì˜¤ë²„ í™”ë©´ ì²˜ë¦¬ í•¨ìˆ˜ (í•„ìš”í•˜ë‹¤ë©´ ì‹¤ì œ êµ¬í˜„ í•„ìš”)
+    /*
+    void ShowGameOverScreen()
+    {
+        Debug.Log("Game Over!");
+        // ì˜ˆ: UnityEngine.SceneManagement.SceneManager.LoadScene("GameOverScene");
+    }
+    */
 }
