@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3835751941346245729}
   - component: {fileID: 2804367007740581520}
   - component: {fileID: 4341117043476687725}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Broken Door
   m_TagString: Interactable
   m_Icon: {fileID: 0}
