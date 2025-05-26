@@ -103,6 +103,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   closedSprite: {fileID: 21300000, guid: 29c9cded5e558164aaf8c9bf08aa1510, type: 3}
   openSprite: {fileID: 21300040, guid: 29c9cded5e558164aaf8c9bf08aa1510, type: 3}
+  itemDisplayPanel: {fileID: 0}
 --- !u!61 &6902214087421542602
 BoxCollider2D:
   m_ObjectHideFlags: 0
