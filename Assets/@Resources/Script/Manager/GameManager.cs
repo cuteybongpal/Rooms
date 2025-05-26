@@ -1,4 +1,5 @@
-using UnityEngine;
+using JetBrains.Annotations;
+using System;
 
 public class GameManager : Singleton<GameManager>
 {
@@ -13,5 +14,4 @@ public class GameManager : Singleton<GameManager>
         instance = this;
         DontDestroyOnLoad(gameObject);
     }
-
 }
