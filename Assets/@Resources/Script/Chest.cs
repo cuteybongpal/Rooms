@@ -12,13 +12,10 @@ public class Chest : MonoBehaviour, IInteractable
 
     private SpriteRenderer spriteRenderer;
     private bool isOpen = false;
-    // private UIManager uiManager; // 이 변수는 이제 필요 없습니다.
 
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        // uiManager = FindObjectOfType<UIManager>(); // 이 줄도 필요 없습니다.
-
         if (spriteRenderer != null && closedSprite != null)
         {
             spriteRenderer.sprite = closedSprite;
@@ -27,8 +24,13 @@ public class Chest : MonoBehaviour, IInteractable
 
     public void Interact()
     {
+        // ▼▼▼ 디버그 로그 추가 ▼▼▼
+        Debug.Log("--- 1. Chest: Interact() 함수 호출됨. 상호작용 시작. ---");
+
         if (!isOpen && itemInChest != null)
         {
+            // ▼▼▼ 디버그 로그 추가 ▼▼▼
+            Debug.Log("--- 2. Chest: 아이템(" + itemInChest.itemName + ")을 인벤토리에 추가 시도. ---");
             bool success = Inventory.instance.AddItem(itemInChest);
 
             if (success)
@@ -38,15 +40,14 @@ public class Chest : MonoBehaviour, IInteractable
                 {
                     spriteRenderer.sprite = openSprite;
                 }
-                // 'UIManager.instance'로 직접 접근
                 UIManager.instance.ShowNotification("You got a " + itemInChest.itemName + "!");
             }
             else
             {
-                // 'UIManager.instance'로 직접 접근
+                // ▼▼▼ 디버그 로그 추가 ▼▼▼
+                Debug.Log("--- 2-1. Chest: 인벤토리 추가 실패! (공간 부족 또는 다른 문제) ---");
                 UIManager.instance.ShowNotification("Inventory is full!");
             }
         }
-
     }
 }

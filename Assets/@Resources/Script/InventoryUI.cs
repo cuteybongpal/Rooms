@@ -3,36 +3,45 @@ using UnityEngine;
 
 public class InventoryUI : MonoBehaviour
 {
-    public Transform slotContainer; // 3-1에서 만든 SlotContainer
-    public GameObject slotPrefab;   // 3-2에서 만든 Slot 프리팹
+    public Transform slotContainer;
+    public GameObject slotPrefab;
 
     private Inventory inventory;
     private InventorySlot[] slots;
 
+    void OnEnable()
+    {
+        // ▼▼▼ 디버그 로그 추가 ▼▼▼
+        Debug.Log("--- A. InventoryUI: OnEnable() 호출됨 (인벤토리 창 켜짐). ---");
+        if (inventory != null && slots != null)
+        {
+            UpdateUI();
+        }
+    }
+
     void Start()
     {
         inventory = Inventory.instance;
-        // 인벤토리 변경 이벤트가 발생하면 UpdateUI 함수를 호출하도록 등록
         inventory.onInventoryChangedCallback += UpdateUI;
-
-        // 인벤토리 공간만큼 미리 슬롯들을 생성
         slots = new InventorySlot[inventory.space];
         for (int i = 0; i < inventory.space; i++)
         {
             GameObject slotObj = Instantiate(slotPrefab, slotContainer);
             slots[i] = slotObj.GetComponent<InventorySlot>();
         }
-
-        UpdateUI(); // 초기 UI 업데이트
+        UpdateUI();
     }
 
     void UpdateUI()
     {
-        // 인벤토리에 있는 아이템들을 슬롯에 그림
+        // ▼▼▼ 디버그 로그 추가 ▼▼▼
+        Debug.Log("--- 6. InventoryUI: UpdateUI() 함수 호출됨! 화면 새로고침 시작. ---");
         for (int i = 0; i < slots.Length; i++)
         {
             if (i < inventory.items.Count)
             {
+                // ▼▼▼ 디버그 로그 추가 ▼▼▼
+                Debug.Log("--- 7. InventoryUI: 슬롯 " + i + "에 아이템 " + inventory.items[i].itemName + " 그리는 중... ---");
                 slots[i].DrawSlot(inventory.items[i]);
             }
             else
