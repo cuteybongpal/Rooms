@@ -247,7 +247,12 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      compass_0: -8942117458661244898
+      compass_1: 6909950076026618475
+      compass_2: -3009044770864682612
+      compass_3: 3983580043116255359
+      compass_4: -3360989855159746515
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
