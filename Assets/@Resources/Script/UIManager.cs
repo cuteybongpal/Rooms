@@ -8,8 +8,11 @@ public class UIManager : MonoBehaviour
     public static UIManager instance;
 
     [Header("UI Panels")]
-    public GameObject inventoryPanel; // ▼▼▼ 인벤토리 패널을 연결할 변수
+    public GameObject inventoryPanel;
     public GameObject notificationPanel;
+    public GameObject gameClearPanel; // ▼▼▼ 1. Game Clear 패널 변수 선언 추가 ▼▼▼
+    public GameObject Description;
+    public GameObject GameOver;
 
     [Header("UI Components")]
     public TextMeshProUGUI notificationText;
@@ -18,38 +21,120 @@ public class UIManager : MonoBehaviour
     [Header("Player")]
     public PlayerMovement playerMovement;
 
+    public bool isShow = false;
     void Awake()
     {
         if (instance != null) { Destroy(gameObject); return; }
         instance = this;
     }
 
-    // ▼▼▼ B키 입력을 받기 위한 Update 함수 추가/수정 ▼▼▼
+    void Start() // Awake 대신 Start로 옮기거나, Start에도 추가 (선택)
+    {
+        if (inventoryPanel != null) inventoryPanel.SetActive(false);
+        if (notificationPanel != null) notificationPanel.SetActive(false);
+        if (gameClearPanel != null) gameClearPanel.SetActive(false); // ▼▼▼ 2. 게임 시작 시 Game Clear 패널 숨기기 추가 ▼▼▼
+
+        // ▼▼▼ GameTimerManager 시작 로직 (이전에 추가했던 것) ▼▼▼
+        if (GameTimerManager.instance != null)
+        {
+            GameTimerManager.instance.StartTimer();
+        }
+        else
+        {
+            Debug.LogWarning("GameTimerManager 인스턴스를 찾을 수 없어 타이머를 시작할 수 없습니다.");
+        }
+    }
+
     void Update()
     {
-        // B 키를 눌렀을 때
         if (Input.GetKeyDown(KeyCode.B))
         {
-            // inventoryPanel의 현재 활성화 상태를 뒤집는다 (켜져있으면 끄고, 꺼져있으면 켠다)
             bool isActive = !inventoryPanel.activeSelf;
             inventoryPanel.SetActive(isActive);
-
-            // 인벤토리가 활성화되면 플레이어 조종을 막고, 비활성화되면 조종을 풀어준다.
-            playerMovement.SetControllable(!isActive);
+            if (playerMovement != null) // playerMovement가 할당되었는지 확인
+            {
+                playerMovement.SetControllable(!isActive);
+            }
         }
     }
 
     public void ShowNotification(string message)
     {
-        StopAllCoroutines();
+        // ... (기존 알림 로직은 동일) ...
+        StopAllCoroutines(); // 기존 알림 코루틴 중지
         StartCoroutine(NotificationCoroutine(message));
     }
 
     private IEnumerator NotificationCoroutine(string message)
     {
+        // ... (기존 알림 코루틴은 동일) ...
         notificationPanel.SetActive(true);
         notificationText.text = message;
         yield return new WaitForSeconds(notificationDuration);
         notificationPanel.SetActive(false);
+    }
+
+    // ▼▼▼ 3. "Game Clear" 메시지를 표시하는 새 함수 전체 추가 ▼▼▼
+    public void ShowGameClearPanel()
+    {
+        if (gameClearPanel != null)
+        {
+            // GameTimerManager에서 타이머 중지 및 시간 가져오기
+            if (GameTimerManager.instance != null)
+            {
+                GameTimerManager.instance.StopTimer();
+                string elapsedTimeString = GameTimerManager.instance.GetFormattedElapsedTime();
+
+                // GameClearPanel 내부의 TextMeshProUGUI 컴포넌트를 찾아서 텍스트 설정
+                TextMeshProUGUI clearTextMessage = gameClearPanel.GetComponent<TextMeshProUGUI>();
+                if (clearTextMessage != null)
+                {
+                    clearTextMessage.text = "GAME CLEAR!\nTime: " + elapsedTimeString;
+                }
+                else
+                {
+                    Debug.LogError("GameClearPanel 내부에 TextMeshProUGUI 컴포넌트가 없습니다!");
+                }
+            }
+            else
+            {
+                Debug.LogError("GameTimerManager 인스턴스를 찾을 수 없습니다!");
+                // 타이머 없이 기본 메시지만 표시할 수도 있음
+                TextMeshProUGUI clearTextMessage = gameClearPanel.GetComponentInChildren<TextMeshProUGUI>();
+                if (clearTextMessage != null)
+                {
+                    clearTextMessage.text = "GAME CLEAR!";
+                }
+            }
+
+            gameClearPanel.SetActive(true);
+            Debug.Log("GAME CLEAR!");
+
+            if (playerMovement != null)
+            {
+                playerMovement.SetControllable(false);
+            }
+            // Time.timeScale = 0f; // (선택적) 게임 시간 정지
+        }
+        else
+        {
+            Debug.LogError("UIManager에 GameClearPanel이 연결되지 않았습니다!");
+        }
+    }
+    public void ShowDescription()
+    {
+        isShow = !isShow;
+        if (isShow)
+        {
+            Description.SetActive(true);
+        }
+        else
+        {
+            Description.SetActive(false);
+        }
+    }
+    public void ShowGameOver()
+    {
+        GameOver.SetActive(true);
     }
 }
