@@ -2,6 +2,8 @@
 using System.Collections;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
@@ -17,6 +19,8 @@ public class UIManager : MonoBehaviour
     [Header("UI Components")]
     public TextMeshProUGUI notificationText;
     public float notificationDuration = 2f;
+    public InputField field;
+    public Button button;
 
     [Header("Player")]
     public PlayerMovement playerMovement;
@@ -79,11 +83,14 @@ public class UIManager : MonoBehaviour
     {
         if (gameClearPanel != null)
         {
+            field.gameObject.SetActive(true);
+            button.gameObject.SetActive(true);
             // GameTimerManager에서 타이머 중지 및 시간 가져오기
             if (GameTimerManager.instance != null)
             {
                 GameTimerManager.instance.StopTimer();
                 string elapsedTimeString = GameTimerManager.instance.GetFormattedElapsedTime();
+
 
                 // GameClearPanel 내부의 TextMeshProUGUI 컴포넌트를 찾아서 텍스트 설정
                 TextMeshProUGUI clearTextMessage = gameClearPanel.GetComponent<TextMeshProUGUI>();
@@ -120,6 +127,12 @@ public class UIManager : MonoBehaviour
         {
             Debug.LogError("UIManager에 GameClearPanel이 연결되지 않았습니다!");
         }
+        IDataSave save = DIContainer.GetInstance<IDataSave>() as IDataSave;
+        button.onClick.AddListener(() =>
+        {
+            save.saveRanking(new RankingData(field.text, (int)GameTimerManager.instance.GetElapsedTime()));
+            SceneManager.LoadScene(0);
+        });
     }
     public void ShowDescription()
     {
