@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class DataManager
@@ -11,4 +12,10 @@ public class DataManager
     {
         return default(T);
     }
+}
+[Serializable]
+public class RankingData
+{
+    public string name;
+    public int score;
 }
