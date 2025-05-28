@@ -6,7 +6,9 @@ public class GhostMovement : MonoBehaviour
     private bool _canControl = false;
     private Animator _animator;
     private string _isMovingParamName = "isMoving"; // 애니메이션 파라미터 이름 (필요하다면)
-
+                                                    // 소음 발생 관련 변수
+    public float noiseInterval = 0.5f; // 0.5초마다 소리를 발생시킵니다.
+    private float noiseTimer;
     // --- [새로운 변수 추가] ---
     private SpriteRenderer spriteRenderer;
     private bool _isFacingRight = true; // 유령이 처음에 오른쪽을 보고 있다고 가정
@@ -34,6 +36,10 @@ public class GhostMovement : MonoBehaviour
         }
     }
 
+    // GhostMovement.cs
+
+    // GhostMovement.cs 파일의 Update 함수
+
     void Update()
     {
         if (!_canControl)
@@ -45,24 +51,36 @@ public class GhostMovement : MonoBehaviour
         float moveY = Input.GetAxisRaw("Vertical");
         Vector2 moveInput = new Vector2(moveX, moveY);
 
-        // --- [캐릭터 좌우 반전 로직 추가] ---
-        if (moveX > 0 && !_isFacingRight) // 오른쪽으로 움직이는데 왼쪽을 보고 있다면
+        if (moveX > 0 && !_isFacingRight)
         {
             Flip();
         }
-        else if (moveX < 0 && _isFacingRight) // 왼쪽으로 움직이는데 오른쪽을 보고 있다면
+        else if (moveX < 0 && _isFacingRight)
         {
             Flip();
         }
-        // --- [여기까지 추가] ---
 
-        // 이동 로직
         transform.Translate(moveInput.normalized * speed * Time.deltaTime, Space.World);
 
-        // 애니메이션 로직 (필요하다면)
+        // isMoving 변수를 여기서 직접 계산해서 사용합니다.
+        bool isMoving = moveInput.sqrMagnitude > 0.01f;
         if (_animator != null)
         {
-            _animator.SetBool(_isMovingParamName, moveInput.sqrMagnitude > 0.01f);
+            _animator.SetBool(_isMovingParamName, isMoving);
+        }
+
+        // 수정된 소음 발생 로직
+        if (isMoving)
+        {
+            noiseTimer += Time.deltaTime;
+            if (noiseTimer >= noiseInterval)
+            {
+                noiseTimer = 0f;
+                if (NoiseManager.instance != null)
+                {
+                    NoiseManager.instance.MakeNoise(transform.position);
+                }
+            }
         }
     }
 

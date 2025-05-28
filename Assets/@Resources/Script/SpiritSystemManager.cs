@@ -5,9 +5,10 @@ public class SpiritSystemManager : MonoBehaviour
     public KeyCode toggleKey = KeyCode.Q;
     public GameObject playerGameObject;
     public GameObject ghostPrefab;
-    public CameraFollow gameCameraFollowScript; // Main Camera의 CameraFollow 스크립트
+    public CameraFollow gameCameraFollowScript;
 
     private PlayerMovement _playerMovementScript;
+    private PlayerHealth _playerHealth; // 플레이어 체력 스크립트를 저장할 변수
     private GameObject _activeGhostInstance;
     private GhostMovement _ghostMovementScript;
     private bool _isGhostMode = false;
@@ -24,6 +25,14 @@ public class SpiritSystemManager : MonoBehaviour
         if (_playerMovementScript == null)
         {
             Debug.LogError("SpiritSystemManager: Player GameObject에서 PlayerMovement 스크립트를 찾을 수 없습니다!");
+            enabled = false; return;
+        }
+
+        // 플레이어 오브젝트에서 PlayerHealth 컴포넌트 가져오기
+        _playerHealth = playerGameObject.GetComponent<PlayerHealth>();
+        if (_playerHealth == null)
+        {
+            Debug.LogError("SpiritSystemManager: Player GameObject에서 PlayerHealth 스크립트를 찾을 수 없습니다!");
             enabled = false; return;
         }
 
@@ -52,26 +61,24 @@ public class SpiritSystemManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(toggleKey))
+        // Q키를 눌렀고, 플레이어가 살아있을 때만 유령 모드로 전환
+        if (Input.GetKeyDown(toggleKey) && _playerHealth != null && _playerHealth.currentHealth > 0)
         {
             ToggleSpiritMode();
         }
     }
 
-    void ToggleSpiritMode()
+    public void ToggleSpiritMode()
     {
         _isGhostMode = !_isGhostMode;
 
         if (_isGhostMode) // 유령 모드로 전환
         {
-            // 1. 플레이어 조종 중지 (가장 먼저 실행)
             if (_playerMovementScript != null)
             {
-                Debug.Log("SpiritSystemManager: 플레이어 조종 중지 호출");
-                _playerMovementScript.SetControllable(false); // ★ 플레이어 조종 불가로 설정
+                _playerMovementScript.SetControllable(false);
             }
 
-            // 2. 유령 생성 및 조종 활성화
             if (ghostPrefab != null && playerGameObject != null)
             {
                 Vector3 spawnPosition = playerGameObject.transform.position;
@@ -81,37 +88,37 @@ public class SpiritSystemManager : MonoBehaviour
                 if (_ghostMovementScript != null)
                 {
                     _ghostMovementScript.SetControllable(true);
-                    if (gameCameraFollowScript != null) // 카메라 타겟을 유령으로 변경
+                    if (gameCameraFollowScript != null)
                     {
                         gameCameraFollowScript.target = _activeGhostInstance.transform;
                     }
                 }
-                else Debug.LogError("생성된 유령에서 GhostMovement 스크립트를 찾을 수 없습니다!");
-                Debug.Log("유령 모드 활성화 완료");
             }
         }
         else // 플레이어 모드로 복귀
         {
-            // 1. 유령 제거 및 조종 중지
             if (_activeGhostInstance != null)
             {
-                if (_ghostMovementScript != null) _ghostMovementScript.SetControllable(false);
                 Destroy(_activeGhostInstance);
                 _activeGhostInstance = null;
                 _ghostMovementScript = null;
-                Debug.Log("플레이어 모드 복귀: 유령 제거 완료");
             }
 
-            // 2. 플레이어 조종 재개
-            if (_playerMovementScript != null)
+            // 플레이어의 현재 체력이 0보다 클 때만 조종권을 돌려줍니다.
+            if (_playerMovementScript != null && _playerHealth.currentHealth > 0)
             {
-                Debug.Log("SpiritSystemManager: 플레이어 조종 재개 호출");
-                _playerMovementScript.SetControllable(true); // ★ 플레이어 조종 가능으로 설정
-                if (gameCameraFollowScript != null) // 카메라 타겟을 플레이어로 변경
+                _playerMovementScript.SetControllable(true);
+
+                if (gameCameraFollowScript != null)
                 {
                     gameCameraFollowScript.target = playerGameObject.transform;
                 }
             }
         }
+    }
+
+    public bool IsInGhostMode()
+    {
+        return _isGhostMode;
     }
 }

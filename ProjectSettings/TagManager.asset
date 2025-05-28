@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 3
   tags:
   - Interactable
+  - Enemy
+  - Boss
+  - Obstacles
   layers:
   - Default
   - TransparentFX
@@ -15,9 +18,9 @@ TagManager:
   - Player
   - Ghost
   - GhostPassableWall
-  - 
-  - 
-  - 
+  - Obstacles
+  - GhostlyEnemies
+  - Bullet
   - 
   - 
   - 

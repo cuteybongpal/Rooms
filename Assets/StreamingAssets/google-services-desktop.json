@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "118243326673",
+    "project_id": "unity-ranking",
+    "storage_bucket": "unity-ranking.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:118243326673:android:bd06138048ca3a27db23f0",
+        "android_client_info": {
+          "package_name": "com.application.rooms"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNaMnGyzboF5zzRVVHRowqNQGyzaoZb5w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1",
+  "database_url": "https://unity-ranking-default-rtdb.asia-southeast1.firebasedatabase.app/"
+}
