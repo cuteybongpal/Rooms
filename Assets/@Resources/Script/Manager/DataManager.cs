@@ -20,6 +20,7 @@ public class DataManager
     static bool isSignIn = false;
     async void SignInAnonymously(FirebaseApp app)
     {
+        Debug.Log("로그인 중");
         try
         {
             Auth = FirebaseAuth.GetAuth(app);
@@ -36,12 +37,13 @@ public class DataManager
     }
     public async void SaveRanking(RankingData rankingData)
     {
+        Debug.Log("랭킹 세이브(데이터 매니저 직접 접근 단계)");
         while (!isSignIn)
         {
             await UniTask.Yield();
         }
-        Debug.Log("��ŷ ���̺�(������ �Ŵ��� ���� �ܰ�)");
-        var app = Firebase.FirebaseApp.DefaultInstance;
+        Debug.Log("랭킹 세이브(데이터 매니저 직접 접근 단계)");
+        var app = Auth.App;
         var option = app.Options;
 
         Debug.Log("Project ID: " + option.ProjectId);
@@ -53,11 +55,11 @@ public class DataManager
         try
         {
             await dbRef.Child("rankings").Child(User.UserId).SetRawJsonValueAsync(jsonData);
-            Debug.Log("��ŷ ���� ����");
+            Debug.Log("랭킹 저장 성공");
         }
         catch (Exception e)
         {
-            Debug.LogError($"��ŷ ���� ���� tv �� {e.StackTrace}");
+            Debug.LogError($"랭킹 저장 실패{e.StackTrace}");
         }
 
     }
@@ -117,7 +119,7 @@ public class DataManager
             }
             else
             {
-                Debug.LogError("Firebase �ʱ�ȭ ����: " + task.Result);
+                Debug.LogError("Firebase Error: " + task.Result);
             }
         });
     }

@@ -129,6 +129,7 @@ public class UIManager : MonoBehaviour
             Debug.LogError("UIManager에 GameClearPanel이 연결되지 않았습니다!");
         }
         IDataSave save = DIContainer.GetInstance<IDataSave>() as IDataSave;
+        save.Init();
         button.onClick.AddListener(() =>
         {
             try

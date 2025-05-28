@@ -22,7 +22,7 @@ public class NoiseManager : MonoBehaviour
     public void MakeNoise(Vector3 position)
     {
         // ▼▼▼ 1단계 디버그 로그 ▼▼▼
-        Debug.Log("1단계: 소음 발생! 위치: " + position);
+        //Debug.Log("1단계: 소음 발생! 위치: " + position);
         OnNoiseMade?.Invoke(position);
     }
 }

@@ -123,7 +123,7 @@ public class BossController : MonoBehaviour
             isPlayerInRangeForCapture = false;
             playerTransform = null;
             currentKeyPresses = 0; // 범위를 벗어나면 카운트 초기화
-            Debug.Log("플레이어가 보스 포획 범위를 벗어났습니다.");
+            //Debug.Log("플레이어가 보스 포획 범위를 벗어났습니다.");
         }
     }
 
@@ -132,7 +132,7 @@ public class BossController : MonoBehaviour
     void ProcessBossCaptured()
     {
         isCaptured = true;
-        Debug.Log("보스 포획! 게임 클리어!");
+        //Debug.Log("보스 포획! 게임 클리어!");
 
         StopAllCoroutines(); // 진행 중인 공격 패턴 코루틴 중지
 
@@ -162,7 +162,7 @@ public class BossController : MonoBehaviour
 
         int patternIndex = Random.Range(1, 4);
         // if (animator != null) animator.SetTrigger("AttackPattern" + patternIndex);
-        Debug.Log("보스 공격 패턴 실행: " + patternIndex);
+        //Debug.Log("보스 공격 패턴 실행: " + patternIndex);
 
         switch (patternIndex)
         {
