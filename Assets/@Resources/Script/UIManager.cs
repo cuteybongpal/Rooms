@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System;
 
 public class UIManager : MonoBehaviour
 {
@@ -130,7 +131,14 @@ public class UIManager : MonoBehaviour
         IDataSave save = DIContainer.GetInstance<IDataSave>() as IDataSave;
         button.onClick.AddListener(() =>
         {
-            save.saveRanking(new RankingData(field.text, (int)GameTimerManager.instance.GetElapsedTime()));
+            try
+            {
+                save.saveRanking(new RankingData(field.text, (int)GameTimerManager.instance.GetElapsedTime()));
+            }
+            catch (Exception e)
+            {
+
+            }
             SceneManager.LoadScene(0);
         });
     }
